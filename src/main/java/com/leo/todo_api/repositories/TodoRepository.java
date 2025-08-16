@@ -37,5 +37,12 @@ public class TodoRepository {
 
   public boolean delete(Long id) {
     return store.remove(id) != null;
+    //Equivalent Code (More Verbose)
+    /*Todo removedTodo = store.remove(id);
+    if (removedTodo != null) {
+      return true; // Todo existed and was removed
+    } else {
+      return false; // Todo did not exist
+    }*/
   }
 }
