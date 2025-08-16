@@ -10,29 +10,36 @@ import java.util.Optional;
 @Service
 public class TodoService {
 
-  private final TodoRepository repository;
+  private final TodoRepository todoRepository;
 
-  public TodoService(TodoRepository repository) {
-    this.repository = repository;
+  public TodoService(TodoRepository todoRepository) {
+    this.todoRepository = todoRepository;
   }
 
   public List<Todo> getAllTodos() {
-    return repository.findAll();
+    return todoRepository.findAll();
   }
 
   public Optional<Todo> getTodoById(Long id) {
-    return repository.findById(id);
+    return todoRepository.findById(id);
   }
 
   public Todo createTodo(Todo todo) {
-    return repository.save(todo);
+    return todoRepository.save(todo);
   }
 
-  public Optional<Todo> updateTodo(Long id, Todo todo) {
-    return repository.update(id, todo);
+  public Optional<Todo> updateTodo(Long id, Todo updatedTodo) {
+    return todoRepository.findById(id).map(existingTodo -> {
+      existingTodo.setTitle(updatedTodo.getTitle());
+      existingTodo.setCompleted(updatedTodo.isCompleted());
+      return todoRepository.save(existingTodo);
+    });
   }
 
   public boolean deleteTodo(Long id) {
-    return repository.delete(id);
+    return todoRepository.findById(id).map(todo -> {
+      todoRepository.deleteById(id);
+      return true;
+    }).orElse(false);
   }
 }
