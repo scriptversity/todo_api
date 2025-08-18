@@ -3,7 +3,7 @@ package com.leo.todo_api.services;
 import com.leo.todo_api.models.User;
 import com.leo.todo_api.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +12,11 @@ import java.util.Optional;
 @Service
 public class UserService {
   private final UserRepository userRepository;
+  private final BCryptPasswordEncoder passwordHasher;
 
-  public UserService(UserRepository userRepository){
+  public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordHasher){
     this.userRepository = userRepository;
+    this.passwordHasher = passwordHasher;
   }
 
   @PostConstruct
@@ -25,14 +27,10 @@ public class UserService {
 
   public boolean login(String email, String rawPassword) {
     User user = userRepository.findByEmail(email);
-    if (user == null) {
-      return false; // User not found
-    }
-    // For now, just check if the rawPassword matches the stored password directly
-    // (In a real app, you should NEVER do this—always use password encoding!)
-    return rawPassword.equals(user.getPassword());
-  }
+    if (user == null) return false;
 
+    return passwordHasher.matches(rawPassword, user.getPassword());
+  }
 
   public List<User> getAllUsers() {
     return userRepository.findAll();
@@ -43,6 +41,7 @@ public class UserService {
   }
 
   public User createUser(User user) {
+    user.setPassword(passwordHasher.encode(user.getPassword()));
     return userRepository.save(user);
   }
 
