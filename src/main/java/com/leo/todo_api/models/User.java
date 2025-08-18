@@ -1,5 +1,6 @@
 package com.leo.todo_api.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class User {
 
   private String role;
 
+  @JsonIgnore
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
   private List<Todo> todos;
 }

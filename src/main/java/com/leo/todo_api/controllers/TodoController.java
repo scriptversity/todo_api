@@ -30,8 +30,11 @@ public class TodoController {
   }
 
   @PostMapping
-  public ResponseEntity<Todo> createTodo(@RequestBody Todo todo) {
-    Todo created = todoService.createTodo(todo);
+  public ResponseEntity<Todo> createTodo(
+          @RequestParam Long userId,
+          @RequestBody Todo todo
+  ) {
+    Todo created = todoService.createTodo(userId, todo);
     return ResponseEntity.ok(created);
   }
 
