@@ -1,7 +1,7 @@
 package com.leo.todo_api.controllers;
 
 import com.leo.todo_api.models.User;
-//import com.leo.todo_api.services.JwtService;
+import com.leo.todo_api.services.JwtService;
 import com.leo.todo_api.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +14,11 @@ import java.util.Map;
 @RequestMapping("/api/v1/users")
 public class UserController {
   private final UserService userService;
+  private final JwtService jwtService;
 
-  public UserController(UserService userService){
+  public UserController(UserService userService, JwtService jwtService){
     this.userService = userService;
+    this.jwtService = jwtService;
   }
 
   @GetMapping
@@ -50,12 +52,18 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<String> login(@RequestBody User user) {
+  public ResponseEntity<?> login(@RequestBody User user) {
     boolean success = userService.login(user.getEmail(), user.getPassword());
-    if (success) {
-      return ResponseEntity.ok("Login successful");
-    } else {
+    if (!success) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
     }
+
+    String accessToken = jwtService.generateAccessToken(user.getEmail());
+    String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+
+    return ResponseEntity.ok(Map.of(
+            "accessToken", accessToken,
+            "refreshToken", refreshToken
+    ));
   }
 }
